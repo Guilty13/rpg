@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -10,7 +11,7 @@ struct TStatMeta {
     string name = "Null";
     float minValue = 0.;
     float maxValue = 1000000.;
-    float decay = -0.023104906; // Value /= exp(Decay) per day. -0.023104906 => 0.5 per month
+    float decay = -0.0004813522; // Value *= exp(Decay) per minute. -0.0004813522 => stat halves in 1 day
 
     TStatMeta() {}
 
@@ -52,17 +53,24 @@ struct TStatsMeta {
 
 extern TStatsMeta StatsMeta;
 
+struct TStats;
+ostream& operator <<(ostream& os, const TStats& stats); 
+
 struct TStats {
 
     map<size_t, float> Stats;
     
-    TStats operator +(const TStats& s) const {
-        TStats r;
-        //TODO: join!
-        r.Stats = Stats;
-        for (auto p: s.Stats) {
-            r.Stats[p.first] += p.second;
+    TStats& operator +=(const TStats& s) {
+        for (auto& p: s.Stats) {
+            Stats[p.first] += p.second;
         }
+        return *this;
+    }
+
+    TStats operator +(const TStats& s) const {
+        // TODO: join?!
+        auto r = *this;
+        r += s;
         return r;
     }
 
@@ -81,7 +89,14 @@ struct TStats {
         Stats[StatsMeta.FindIdByName(name)] = value;
         return *this;
     }
-};
 
-ostream& operator <<(ostream& os, const TStats& stats); 
+    TStats& Decay(float dt) {
+        for (auto& p: Stats) {
+            auto meta = StatsMeta[p.first];
+            p.second *= exp(meta.decay * dt);
+        }
+
+        return *this;
+    }
+};
 

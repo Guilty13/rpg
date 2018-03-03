@@ -12,7 +12,7 @@ std::ostream& operator <<(std::ostream& os, const TPath& o) {
 std::ostream& operator <<(std::ostream& os, const TStage& o) {
 
     os << "'" << o.text << "' +" << o.reward << " -> ";
-    for (auto p: o.paths) {
+    for (auto& p: o.paths) {
         os << "\n  " << p << ", ";
     }
     if (o.paths.size() == 0) {
@@ -55,3 +55,4 @@ TQuest TrainAgility() {
     .Done();
 }
 
+TQuestBook QuestBook;

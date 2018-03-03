@@ -8,7 +8,7 @@ ostream& operator <<(ostream& os, const TRequirement& req) {
     } else {
 
         cout << "[ ";
-        for (auto p: req.xs) {
+        for (auto& p: req.xs) {
             cout << " + " << p.second << "*" << StatsMeta[p.first].name;
         }
         cout << " >= " << req.c << " ] ";

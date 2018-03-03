@@ -93,3 +93,22 @@ std::ostream& operator <<(std::ostream& os, const TQuest&);
 
 TQuest TrainStrength();
 TQuest TrainAgility();
+
+struct TQuestBook {
+
+    vector<TQuest> quests;
+
+    TQuestBook() {
+        quests.push_back(TrainStrength());
+        quests.push_back(TrainAgility());
+        //Fishing...
+    }
+
+    const TQuest& operator [](size_t i) const {
+        return quests[i];
+    }
+
+    //TODO: lookup methods...
+};
+
+extern TQuestBook QuestBook;

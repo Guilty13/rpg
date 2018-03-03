@@ -1,6 +1,9 @@
 #include <iostream>
 #include "stats.h"
 
+struct TRequirement;
+std::ostream& operator <<(std::ostream& os, const TRequirement&);
+
 struct TRequirement {
 
     map<size_t, float> xs;
@@ -24,13 +27,19 @@ struct TRequirement {
         return *this;
     }
 
-    bool Check(const TStats& stats) {
+    bool Check(const TStats& stats) const {
         float v = 0.;
-        for (auto p: xs) {
+        for (auto& p: xs) {
             v += p.second * stats[p.first];
         }
         return v >= c;
     }
+
+    void Assert(const TStats& stats) const {
+        if (!Check(stats)) {
+            cerr << "Check failed!: " << *this << " " << stats;
+            throw "Assert";
+        }
+    }
 };
 
-std::ostream& operator <<(std::ostream& os, const TRequirement&);
