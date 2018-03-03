@@ -23,13 +23,15 @@ struct TPath {
 };
 
 struct TStage {
+    string name;
     TStats reward;
     vector<TPath> paths;
     string text;
 
-    TStage(const string& text = "") {
-        this->text = text;
-    }
+    TStage(const string& name, const string& text = "")
+    : name(name)
+    , text(text)
+    {}
 
     TStage& RewardStats(const TStats& reward) { //TODO: stats + items!
         this->reward = reward;
@@ -53,9 +55,8 @@ struct TQuestBuilder {
 
     unordered_map<string, size_t> StageByName;
 
-    TQuestBuilder(const TStage& init = TStage()) {
-        quest.stages.push_back(init);
-        StageByName["__init__"] = 0;
+    TQuestBuilder(const TStage& init = TStage("init")) {
+        Stage(init);
     }
 
     TQuest Done() {
@@ -78,8 +79,8 @@ struct TQuestBuilder {
         return *this;
     }
 
-    TQuestBuilder& Stage(const string& name, const TStage& stage) {
-        StageByName[name] = quest.stages.size();
+    TQuestBuilder& Stage(const TStage& stage) {
+        StageByName[stage.name] = quest.stages.size();
         quest.stages.push_back(stage);
         return *this;
     }
@@ -94,18 +95,12 @@ std::ostream& operator <<(std::ostream& os, const TQuest&);
 TQuest TrainStrength();
 TQuest TrainAgility();
 
-struct TQuestBook {
-
-    vector<TQuest> quests;
+struct TQuestBook: vector<TQuest> {
 
     TQuestBook() {
-        quests.push_back(TrainStrength());
-        quests.push_back(TrainAgility());
+        push_back(TrainStrength());
+        push_back(TrainAgility());
         //Fishing...
-    }
-
-    const TQuest& operator [](size_t i) const {
-        return quests[i];
     }
 
     //TODO: lookup methods...

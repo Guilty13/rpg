@@ -29,29 +29,29 @@ std::ostream& operator <<(std::ostream& os, const TQuest& o) {
 }
 
 TQuest TrainStrength() {
-    return TQuestBuilder(TStage("You are in the training room"))
+    return TQuestBuilder(TStage("init", "You are in the training room"))
+        .Path( TPath().Req(TReq().X("Agility", 1.).C(10.)).Time(45.) , "begin_train")
         .Path( TPath().Time(60.) , "begin_train" )
-        .Path( TPath().Req(TReq().X("Agility", 1.).C(10.)).Time(50.) , "begin_train")
-    .Stage("begin_train", TStage("Prepared for training"))
+    .Stage(TStage("begin_train", "Prepared for training"))
         .Path( TPath(), "poor_train" )
-        .Path( TPath().Req(TReq().X("Strength", 1.).C(10.)), "power_train" )
-    .Stage("poor_train", TStage("Got somewhat trained").RewardStats(TStats("Strength", 1.)))
-    .Stage("power_train", TStage("Got awesomely trained").RewardStats(TStats("Strength", 2.)))
+        .Path( TPath().Req(TReq().X("Strength", 1.).C(5.)), "power_train" )
+    .Stage(TStage("poor_train", "Got somewhat trained").RewardStats(TStats("Strength", 1.)))
+    .Stage(TStage("power_train", "Got awesomely trained").RewardStats(TStats("Strength", 2.)))
     .Done();
 }
 
 TQuest TrainAgility() {
-    return TQuestBuilder(TStage("You are in the training room"))
+    return TQuestBuilder(TStage("init", "You are in the training room"))
         .Path( TPath().Time(60.) , "basic_train" )
-        .Path( TPath().Req(TReq().X("Agility", 1.).C(10.)).Time(50.) , "basic_train")
+        .Path( TPath().Req(TReq().X("Agility", 1.).C(10.)).Time(45.) , "basic_train")
         //.Path( TPath().Req(TReq().X("Agility", 1.).C(30.)).Time(45.) , "begin_train")
         //.Path( TPath().Req(TReq().X("Agility", 1.).C(100.)).Time(40.) , "begin_train")
-    .Stage("basic_train", TStage("Got somewhat trained").RewardStats(TStats("Agility", 1.)))
+    .Stage(TStage("basic_train", "Got somewhat trained").RewardStats(TStats("Agility", 1.)))
         .Path( TPath(), "finish" )
         .Path( TPath().Req(TReq().X("Strength", 1.).C(10.)), "power_train" )
-    .Stage("power_train", TStage("Got awesomely trained").RewardStats(TStats("Agility", 1.)))
+    .Stage(TStage("power_train", "Got awesomely trained").RewardStats(TStats("Agility", 1.)))
         .Path( TPath(), "finish" )
-    .Stage("finish", TStage("Done training"))
+    .Stage(TStage("finish", "Done training"))
     .Done();
 }
 
