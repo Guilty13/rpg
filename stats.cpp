@@ -8,5 +8,6 @@ ostream& operator <<(ostream& os, const TStats& stats) {
         os << StatsMeta[p.first].name << "=" << p.second << ", ";
     }
     os << "}";
+    return os;
 }
 
