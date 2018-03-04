@@ -29,6 +29,7 @@ struct TStatsMeta {
     size_t FindIdByName(const string& name) {
         auto it = IdByName.find(name);
         if (it == IdByName.end()) {
+            cerr << "unknown stat: " << name << endl;
             throw "RTFM";
         }
         return it->second;

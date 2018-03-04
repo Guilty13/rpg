@@ -37,7 +37,7 @@ struct TRequirement {
 
     void Assert(const TStats& stats) const {
         if (!Check(stats)) {
-            cerr << "Check failed!: " << *this << " " << stats;
+            cerr << "Check failed!: " << *this << " " << stats << endl;
             throw "Assert";
         }
     }

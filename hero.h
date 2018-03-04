@@ -98,6 +98,7 @@ struct THero {
                 state.stats.Decay(path.time);
                 state.stats += q.stages[stage].reward;
             } else {
+                cerr << "unknown action type: " << a.type << endl;
                 throw "WTF!";
             }
         }
