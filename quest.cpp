@@ -54,5 +54,3 @@ TQuest TrainAgility() {
     .Stage(TStage("finish", "Done training"))
     .Done();
 }
-
-TQuestBook QuestBook;
