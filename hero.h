@@ -26,6 +26,7 @@ struct TAction {
     TAction& TakePath(size_t path) {
         type = TAKE_PATH;
         this->path = path;
+        return *this;
     }
 };
 
