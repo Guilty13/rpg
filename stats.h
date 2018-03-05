@@ -10,7 +10,7 @@ using namespace std;
 struct TStatMeta {
     size_t id = 0;
     string name = "Null";
-    float minValue = 0.;
+    float minValue =-1000000.;
     float maxValue = 1000000.;
     float decay = -0.0004813522; // Value *= exp(Decay) per minute. -0.0004813522 => stat halves in 1 day
 
@@ -20,6 +20,25 @@ struct TStatMeta {
         this->name = name;
         return *this;
     }
+    
+    TStatMeta& MinValue(const float& minValue) {
+        this->minValue = minValue;
+        return *this;
+    }
+    
+    TStatMeta& MaxValue(const float& maxValue) {
+        this->maxValue = maxValue;
+        return *this;
+    }
+    
+    TStatMeta& Decay(const float& decay) {
+        this->decay = decay;
+        return *this;
+    }
+    
+ //   TStatMeta& Binary() {
+//		return *this->Decay(0.).MaxValue(1.).MinValue(0.));
+//	}
 };
 
 struct TStatsMeta {
@@ -45,6 +64,13 @@ struct TStatsMeta {
         Meta.push_back(TStatMeta().Name("Agility"));
         Meta.push_back(TStatMeta().Name("Strength"));
         Meta.push_back(TStatMeta().Name("Fishing"));
+        //---------------------------------------
+        Meta.push_back(TStatMeta().Name("Will"));
+        Meta.push_back(TStatMeta().Name("Fatigue").MaxValue(0.));
+        Meta.push_back(TStatMeta().Name("ReputationInVillage"));
+        Meta.push_back(TStatMeta().Name("HeroOfVillage").Decay(0.).MaxValue(1.).MinValue(0.));
+        Meta.push_back(TStatMeta().Name("GotSilverFish").Decay(0.).MaxValue(100.).MinValue(0.));
+        //----------------------------------------
 
         for (size_t i = 0; i < Meta.size(); i++) {
             Meta[i].id = i;

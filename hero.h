@@ -61,10 +61,18 @@ struct TOption {
     {}
 };
 
+inline float FunctionForLevel(float l) {
+	if(l > 0) {
+		return sqrt(l);
+	} else {
+		return sqrt(l*-1.);
+	}
+}
+
 inline float Level(const TStats& stats) {
     float l = 0;
     for (auto& p: stats.Stats) {
-        l += sqrt(p.second);
+        l += FunctionForLevel(p.second);
     }
     return l;
 }
@@ -72,7 +80,7 @@ inline float Level(const TStats& stats) {
 inline float DLevel(const TStats& s1, const TStats& s2) {
     float l = 0;
     for (auto& p: s2.Stats) {
-        l += sqrt(p.second) - sqrt(s1[p.first]);
+        l += FunctionForLevel(p.second) - FunctionForLevel(s1[p.first]);
     }
     return l;
 }

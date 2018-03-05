@@ -94,12 +94,21 @@ std::ostream& operator <<(std::ostream& os, const TQuest&);
 
 TQuest TrainStrength();
 TQuest TrainAgility();
+//-------------------
+TQuest TrainFishing();
+TQuest HuntSilverFish();
+TQuest HuntGoldenFish();
+TQuest HelpStupidBoy();
+TQuest BecomeAHeroOfVillage();
+//--------------------
+
 
 struct TQuestBook: vector<TQuest> {
 
     TQuestBook() {
         push_back(TrainStrength());
         push_back(TrainAgility());
+        push_back(TrainFishing());
         //Fishing...
     }
 
