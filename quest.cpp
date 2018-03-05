@@ -63,13 +63,13 @@ TQuest TrainFishing() {
 		.Path( TPath().Req(TReq().X("ReputationInVillage", 1.).C(10.)).Time(15.), "find_boy" )
 		.Path( TPath(), "do_alone" )
 	.Stage(TStage("find_boy", "You fish with stupid boy! It would be funny... maybe.").RewardStats(TStats("ReputationInVillage", 1.5)+TStats("Fishing", 0.5)))
-	.Stage(TStage("do_alone", "You fish alone? Village guys don't like it :-(").RewardStats(TStats("ReputationInVillage", -1.)+TStats("Fishing", 1.)))
+	.Stage(TStage("do_alone", "You fish alone? Village guys don't like it :-(").RewardStats(TStats("ReputationInVillage", -1.)+TStats("Fishing", 3.)))
 	.Done();
 }
 
 TQuest HuntSilverFish() {
 	return TQuestBuilder(TStage("init", "You are near the river"))
-		.Path( TPath().Req(TReq().X("Fishing", 1).X("Will", 0.3).X("Fatigue", 1.).C(45.)).Time(120.) , "begin_hunting")
+		.Path( TPath().Req(TReq().X("Fishing", 1).X("Will", 0.5).X("Fatigue", 1.).C(30.)).Time(120.) , "begin_hunting")
 		.Path( TPath().Req(TReq().X("ReputationInVillage", 1).X("HeroOfVillage", 15.).C(45.)).Time(120.), "find_boyzz")
 	.Stage(TStage("begin_hunting" , "You hunt alone, like Rexxar"))
 		.Path( TPath().Time(60.), "end")

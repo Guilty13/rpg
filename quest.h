@@ -109,6 +109,7 @@ struct TQuestBook: vector<TQuest> {
         push_back(TrainStrength());
         push_back(TrainAgility());
         push_back(TrainFishing());
+        push_back(HuntSilverFish());
         //Fishing...
     }
 

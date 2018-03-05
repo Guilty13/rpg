@@ -65,7 +65,7 @@ inline float FunctionForLevel(float l) {
 	if(l > 0) {
 		return sqrt(l);
 	} else {
-		return sqrt(l*-1.);
+		return -1*sqrt(l*-1.);
 	}
 }
 
