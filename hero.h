@@ -7,7 +7,8 @@ struct TAction {
     enum TActionType {
         NONE = 0,
         TAKE_PATH,
-        USE_ITEM,
+        ENTER_SUB_QUEST,
+        //LEAVE_SUB_QUEST - automatic
     } type = NONE;
 
     union {
@@ -16,8 +17,7 @@ struct TAction {
         };
 
         struct {
-            size_t item;
-            size_t usage;
+            size_t quest;
         };
     };
 
@@ -43,36 +43,91 @@ std::ostream& operator <<(std::ostream& os, const TActionSeq& o);
 
 struct THeroState {
     TStats stats;
-    //TODO: Items
     float time = 0; 
 };
 
 std::ostream& operator <<(std::ostream& os, const THeroState& o);
 
-struct TOption {
+struct TQuestState: THeroState {
     size_t quest;
     size_t stage = 0;
-    TActionSeq actions;
-    THeroState state;
+    TStats boost;
 
-    TOption(size_t quest, const THeroState& state)
-    : quest(quest)
-    , state(state)
+    TQuestState(size_t quest, const THeroState& state)
+    : THeroState(state)
+    , quest(quest)
     {}
+
+    bool TryTakeAction(const TAction& action, bool assert = false) {
+        const auto& quest = QuestBook[this->quest];
+        const auto& stage = quest.stages[this->stage];
+        if (action.type == TAction::TAKE_PATH) {
+            const auto& path = stage.paths[action.path];
+            if (!path.req.Check(stats, boost, assert)) {
+                return false;
+            }
+            time += path.time;
+            this->stage = path.to;
+            stats += path.reward;
+            boost += path.boost;
+            //cerr << "QQ: " << boost << endl;
+            stats.Decay(path.time);
+            stats += quest.stages[path.to].reward;
+            boost += quest.stages[path.to].boost;
+            stats.Clamp();
+            boost.Clamp(); 
+            return true;
+        } else {
+            cerr << "unknown action type: " << action.type << endl;
+            throw "WTF!";
+        }
+    }
+
+    bool IsFinalStage(bool assert  = false) {
+        const auto& quest = QuestBook[this->quest];
+        const auto& stage = quest.stages[this->stage];
+        if (stage.paths.size() == 0) {
+            return true;
+        }
+        if (assert) {
+            cerr << "Not a final stage: Q" << quest << ": S" << stage << endl;
+            throw "Assert!";
+        }
+        return false;
+    }
+
+    const TStage& Stage() const {
+        return QuestBook[quest].stages[stage];
+    }
 };
 
-inline float FunctionForLevel(float l) {
-	if(l > 0) {
-		return sqrt(l);
-	} else {
-		return -1*sqrt(l*-1.);
-	}
+std::ostream& operator <<(std::ostream& os, const TQuestState& o);
+
+struct TOption {
+    TQuestState state;
+    TActionSeq actions;
+
+    TOption(size_t quest, const THeroState& state)
+    : state(quest, state)
+    {}
+
+
+};
+
+std::ostream& operator <<(std::ostream& os, const TOption& o);
+
+inline float Level(float l) {
+    if(l > 0) {
+        return sqrt(l);
+    } else {
+        return -1*sqrt(l*-1.);
+    }
 }
 
 inline float Level(const TStats& stats) {
     float l = 0;
     for (auto& p: stats.Stats) {
-        l += FunctionForLevel(p.second);
+        l += Level(p.second);
     }
     return l;
 }
@@ -80,42 +135,32 @@ inline float Level(const TStats& stats) {
 inline float DLevel(const TStats& s1, const TStats& s2) {
     float l = 0;
     for (auto& p: s2.Stats) {
-        l += FunctionForLevel(p.second) - FunctionForLevel(s1[p.first]);
+        l += Level(p.second) - Level(s1[p.first]);
     }
     return l;
 }
-
 
 
 struct THero {
 
     THeroState state;
     //TODO: bot settings
+    
 
     void CompleteQuest(size_t quest, const TActionSeq& actions) {
-        auto state = this->state;
+        TQuestState state(quest, this->state);
         auto q = QuestBook[quest];
-        size_t stage = 0;
 
         for (auto a: actions) {
-            if (a.type == TAction::TAKE_PATH) {
-                auto path = q.stages[stage].paths[a.path];
-                path.req.Assert(state.stats);
-                state.time += path.time;
-                stage = path.to;
-                state.stats.Decay(path.time);
-                state.stats += q.stages[stage].reward;
-            } else {
-                cerr << "unknown action type: " << a.type << endl;
-                throw "WTF!";
-            }
+            state.TryTakeAction(a, true);
         }
-        if (q.stages[stage].paths.size() != 0) {
-            cerr << "Not a final stage: " << stage << endl;
-            throw "Assert!";
-        }
+        state.IsFinalStage(true);
 
-        this->state = state;
+        this->state = state; // discard boosts
+    }
+
+    void CompleteQuest(const TOption& opt) {
+        CompleteQuest(opt.state.quest, opt.actions);
     }
 
     void Progress() {
@@ -131,28 +176,24 @@ struct THero {
         while (search.size()) {
             auto opt = search.front();
             search.pop_front();
-            const auto& quest = QuestBook[opt.quest];
-            const auto& stage = quest.stages[opt.stage];
+
+            const auto& stage = opt.state.Stage();
             for (size_t i = 0; i < stage.paths.size(); i++) {
-                const auto& path = stage.paths[i];
-                if (path.req.Check(opt.state.stats)) {
-                    TOption op = opt;
-                    op.actions.TakePath(i);
-                    op.state.time += path.time;
-                    op.stage = path.to;
-                    op.state.stats.Decay(path.time);
-                    op.state.stats += quest.stages[path.to].reward;
+                TOption op = opt;
+
+                op.actions.TakePath(i);
+                if (op.state.TryTakeAction(op.actions.back())) {
                     search.push_back(op);
-                    cerr << "Search: Q" << op.quest << ": " << op.actions << " S" << op.stage << "(" << quest.stages[op.stage].name << "): " << op.state << endl;
+                    cerr << "Search: " << op << endl;
                 }
             }
-            if (stage.paths.size() == 0) {
+            if (opt.state.IsFinalStage()) {
                 result.push_back(opt);
             }
         }
 
         for (auto op: result) {
-            cerr << "Result: Q" << op.quest << ": " << op.actions << " S" << op.stage << ": " << op.state << endl;
+            cerr << "Result: " << op << endl;
         }
 
         std::sort(result.begin(), result.end(), [this](auto& x, auto& y) {
@@ -163,9 +204,9 @@ struct THero {
         });
 
         auto op = result.back();
-        cerr << "Best: Q" << op.quest << ": " << op.actions << " S" << op.stage << ": " << op.state << endl;
+        cerr << "Best: " << op << endl;
 
-        CompleteQuest(result.back().quest, result.back().actions);
+        CompleteQuest(result.back());
         //CompleteQuest(0, TActionSeq().TakePath(0).TakePath(0));
         //cout << state << endl; 
         //CompleteQuest(1, TActionSeq().TakePath(0).TakePath(0));

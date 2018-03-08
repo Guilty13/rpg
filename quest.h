@@ -7,10 +7,28 @@
 using TReq = TRequirement;
 
 struct TPath {
+    TStats reward;
+    TStats boost;
     TReq req;
     size_t to;
     float time = 0.; //minutes
 
+    TPath& RewardStats(const TStats& reward) { // permanent stats addon
+        this->reward += reward;
+        return *this;
+    }
+    TPath& RewardStats(const string& name, float value) {
+        RewardStats(TStats(name, value));
+        return *this;
+    }
+    TPath& RewardBoost(const TStats& boost) { // temporary stats boost
+        this->boost += boost;
+        return *this;
+    }
+    TPath& RewardBoost(const string& name, float value) {
+        RewardBoost(TStats(name, value));
+        return *this;
+    }
     TPath& Req(const TReq& req) {
         this->req = req;
         return *this;
@@ -20,11 +38,13 @@ struct TPath {
         this->time = time;
         return *this;
     }
+
 };
 
 struct TStage {
     string name;
     TStats reward;
+    TStats boost;
     vector<TPath> paths;
     string text;
 
@@ -33,8 +53,20 @@ struct TStage {
     , text(text)
     {}
 
-    TStage& RewardStats(const TStats& reward) { //TODO: stats + items!
-        this->reward = reward;
+    TStage& RewardStats(const TStats& reward) { // permanent stats addon
+        this->reward += reward;
+        return *this;
+    }
+    TStage& RewardStats(const string& name, float value) {
+        RewardStats(TStats(name, value));
+        return *this;
+    }
+    TStage& RewardBoost(const TStats& boost) { // temporary stats boost
+        this->boost += boost;
+        return *this;
+    }
+    TStage& RewardBoost(const string& name, float value) {
+        RewardBoost(TStats(name, value));
         return *this;
     }
 };
@@ -94,26 +126,12 @@ std::ostream& operator <<(std::ostream& os, const TQuest&);
 
 TQuest TrainStrength();
 TQuest TrainAgility();
-//-------------------
-TQuest TrainFishing();
-TQuest HuntSilverFish();
-TQuest HuntGoldenFish();
-TQuest HelpStupidBoy();
-TQuest BecomeAHeroOfVillage();
-//--------------------
-
+TQuest GatherBerries();
 
 struct TQuestBook: vector<TQuest> {
 
-    TQuestBook() {
-        push_back(TrainStrength());
-        push_back(TrainAgility());
-        push_back(TrainFishing());
-        push_back(HuntSilverFish());
-        //Fishing...
-    }
-
-    //TODO: lookup methods...
+    TQuestBook();
+    //TODO: lookup methods?..
 };
 
 extern TQuestBook QuestBook;

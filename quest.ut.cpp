@@ -7,5 +7,7 @@ int main() {
     cout << TrainStrength() << endl;
     cout << "Quest TrainAgility" << endl;
     cout << TrainAgility() << endl;
+    cout << "Quest GatherBerries" << endl;
+    cout << GatherBerries() << endl;
 }
 

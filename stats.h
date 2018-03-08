@@ -63,10 +63,14 @@ struct TStatsMeta {
         Meta.push_back(TStatMeta());
         Meta.push_back(TStatMeta().Name("Agility"));
         Meta.push_back(TStatMeta().Name("Strength"));
+        Meta.push_back(TStatMeta().Name("Will"));
         Meta.push_back(TStatMeta().Name("Fishing"));
         //---------------------------------------
-        Meta.push_back(TStatMeta().Name("Will"));
-        Meta.push_back(TStatMeta().Name("Fatigue").MaxValue(0.));
+        Meta.push_back(TStatMeta().Name("Blackberry").Decay(-0.0004813522/3));
+        Meta.push_back(TStatMeta().Name("Raspberry").Decay(-0.0004813522/3));
+        Meta.push_back(TStatMeta().Name("Rounds").Decay(0.).MinValue(0.));
+        //---------------------------------------
+        Meta.push_back(TStatMeta().Name("Fatigue").MaxValue(0.).Decay(-0.0004813522 * 6));
         Meta.push_back(TStatMeta().Name("ReputationInVillage"));
         Meta.push_back(TStatMeta().Name("HeroOfVillage").Decay(0.).MaxValue(1.).MinValue(0.));
         Meta.push_back(TStatMeta().Name("GotSilverFish").Decay(0.).MaxValue(100.).MinValue(0.));
@@ -100,6 +104,13 @@ struct TStats {
         auto r = *this;
         r += s;
         return r;
+    }
+
+    void Clamp() {
+        for (auto& p: Stats) {
+            const auto& meta = StatsMeta[p.first];
+            p.second = std::max(std::min(p.second, meta.maxValue), meta.minValue);
+        }
     }
 
     float operator[](size_t id) const {
